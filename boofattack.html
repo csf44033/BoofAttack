@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <h1>John's Game</h1>
+        <canvas id = "c" width="400" height="400"></canvas>
+        <script>
+            var canvas = document.getElementById("c");
+            var ctx = canvas.getContext("2d");
+            var players = [];
+            function Player (){
+                this.x=Math.random()*canvas.width;
+                this.y=Math.random()*canvas.height;
+                this.r=Math.floor(Math.random()*20+10);
+                this.ID = players.length;
+                this.vx = Math.random()*2-1;
+                this.vy = Math.random()*2-1;
+            }
+            Player.prototype = {
+                display : function(){
+                    ctx.fillStyle = "rgb(255,0,0)";
+                    ctx.beginPath();
+                    ctx.arc(this.x,this.y,this.r/2,0,Math.PI*2);
+                    ctx.closePath();
+                    ctx.fill();
+                },
+                update : function(){
+                    this.x+=this.vx;
+                    this.y+=this.vy;
+                    if(Math.abs(this.x-canvas.width/2)>canvas.width/2){
+                        var s = this.vx<0?1:0;
+                        this.x = canvas.width*s;
+                    }
+                    if(Math.abs(this.y-canvas.height/2)>canvas.height/2){
+                        var s = this.vy<0?1:0;
+                        this.y = canvas.height*s;
+                    }
+                },
+                collide : function(){
+                    for(var i = this.ID + 1; i < players.length; i ++){
+                        var dx = players[i].x - this.x;
+                        var dy = players[i].y - this.y;
+                        var d = dx*dx + dy*dy;
+                        if(d*4 < Math.pow(this.r + players[i].r, 2)){
+                            d = 1/Math.sqrt(d);
+                            dx*=d;
+                            dy*=d;
+                            this.x = players[i].x - dx*(players[i].r + this.r)/2;
+                            this.y = players[i].y - dy*(players[i].r + this.r)/2;
+                        }
+                    }
+                }
+            };
+            for(var i = 0; i < 10; i ++){
+                players.push(new Player());
+            }
+            function run (){
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                for(var i = 0; i < players.length; i ++){
+                    players[i].display();
+                    players[i].update();
+                    players[i].collide();
+                }
+            }
+            var loop = window.setInterval(run,16);
+        </script>
+    </body>
+</html>
